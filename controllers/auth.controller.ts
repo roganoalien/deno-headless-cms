@@ -1,6 +1,13 @@
-import { RouterContext } from 'https://deno.land/x/oak/mod.ts';
-import db from '../config/db.config.ts';
-// import { v4 } from 'https://deno.land/std/uuid/mod.ts';
+import {
+	RouterContext,
+	Route,
+	Body,
+	Request,
+	Response
+} from 'https://deno.land/x/oak/mod.ts';
+import * as bcrypt from 'https://deno.land/x/bcrypt/mod.ts';
+import { db, User } from '../config/db.config.ts';
+import { canContinue } from '../utils/validator.ts';
 
 const adminsCollection = db.collection('admins');
 
@@ -10,68 +17,54 @@ interface Login {
 }
 
 interface UserRegister {
+	name: string;
 	email: string;
 	password: string;
 	confirmPassword: string;
 }
 
-export const getUsers = async (ctx: RouterContext) => {
-	const users = await adminsCollection.find();
-	ctx.response.body = {
-		message: 'These are the users',
-		users
-	};
+export const createUser = async ({
+	request,
+	response
+}: {
+	request: Request;
+	response: Response;
+}) => {
+	//-- Validates that the request has a body
+	if (!request.hasBody) {
+		response.status = 400;
+		response.body = {
+			status: 400,
+			message: 'Request was not with the correct formar!'
+		};
+	}
+	// Gets request body inside with interface UserRegister format
+	const body: Body = await request.body();
+	const theUser: UserRegister = body.value;
+	// If that user email does not exists, procceeds
+	const continues = await canContinue(theUser.email);
+	if (continues) {
+		// Encrypts and salts password
+		const salt = await bcrypt.genSalt(10);
+		const password = await bcrypt.hash(theUser.password, salt);
+		// Save user in DB
+		await User.insertOne({
+			name: theUser.name,
+			email: theUser.email,
+			password
+		});
+		// Response
+		response.status = 200;
+		response.body = {
+			status: 200,
+			message: 'The user has been created!'
+		};
+	} else {
+		// If the user already exits
+		response.status = 400;
+		response.body = {
+			status: 400,
+			message: 'The user already exists!'
+		};
+	}
 };
-
-// export const login = async ({
-// 	request,
-// 	response
-// }: {
-// 	request: Request;
-// 	response: Response;
-// }) => {
-// 	const body: Body = await request.body();
-// 	if (!request.hasBody) {
-// 		response.status = 404;
-// 		response.body = {
-// 			message: '¡Tanto el correo como el password son obligatorios'
-// 		};
-// 	} else {
-// 		const user: Login = body.value;
-
-// 		// VALIDATES USER IN DB
-// 		// RESPONSE WITH TOKEN
-
-// 		response.body = {
-// 			message: '¡Bienvenido!',
-// 			jwt: 'jdasjkghjfisdj'
-// 		};
-// 	}
-// };
-
-// export const register = async ({
-// 	request,
-// 	response
-// }: {
-// 	request: Request;
-// 	response: Response;
-// }) => {
-// 	const body: Body = await request.body();
-
-// 	if (!request.hasBody) {
-// 		response.status = 404;
-// 		response.body = {
-// 			message: '¡Todos los datos son obligatorios!'
-// 		};
-// 	} else {
-// 		const register: UserRegister = body.value;
-
-// 		// ENCRYPT PASSWORD
-// 		// SAVE USER WITH ENCRYPTED PASSWORD IN DB
-
-// 		response.status = 200;
-// 		response.body = {
-// 			message: '¡El usuario fue creado!'
-// 		};
-// 	}
-// };

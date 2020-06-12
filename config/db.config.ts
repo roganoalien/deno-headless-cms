@@ -8,4 +8,6 @@ client.connectWithUri("mongodb://localhost:27017");
 
 const db = client.database(config.DB_NAME);
 
-export default db;
+const User = db.collection("users");
+
+export { db, User };

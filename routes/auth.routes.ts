@@ -7,10 +7,8 @@ const router = new Router();
 router.get('/login', ({ response }): void => {
 	response.body = 'Login url';
 });
-router.get('/users', authController.getUsers);
-router.get('/register', ({ response }): void => {
-	response.body = 'Register url';
-});
+// router.get('/users', authController.getUsers);
+router.post('/register', authController.createUser);
 
 // router.post('/login', authController.login);
 // router.post('/register', authController.register);
