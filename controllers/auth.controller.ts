@@ -7,21 +7,17 @@ import {
 } from 'https://deno.land/x/oak/mod.ts';
 import * as bcrypt from 'https://deno.land/x/bcrypt/mod.ts';
 import { db, User } from '../config/db.config.ts';
+import { UserRegister } from '../interfaces/interface.auth.ts';
 import { canContinue } from '../utils/validator.ts';
 
 const adminsCollection = db.collection('admins');
 
-interface Login {
-	email: string;
-	password: string;
-}
-
-interface UserRegister {
-	name: string;
-	email: string;
-	password: string;
-	confirmPassword: string;
-}
+// interface UserRegister {
+// 	name: string;
+// 	email: string;
+// 	password: string;
+// 	confirmPassword: string;
+// }
 
 export const createUser = async ({
 	request,

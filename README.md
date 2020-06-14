@@ -30,6 +30,7 @@ This is a project to test and do some work with Deno before using it in producti
 -   [ X ] Get data from POST calls
 -   [ X ] Encrypt password on user creation
 -   [ X ] Save user on db
+-   [ ] Validate login data through another endpoint IS HALF WAY... just needs to return a valid json response with the errors and thats it.
 -   [ ] Return user without passwords
 -   [ ] Add JWT to the login functionality
 -   [ ] On POST user Login match the password
